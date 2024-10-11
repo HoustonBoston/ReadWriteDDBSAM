@@ -11,13 +11,17 @@
  * 
  */
 
-import {v4 as uuidv4} from "uuid"
+import { v4 as uuidv4 } from "uuid"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import
 {
   DynamoDBDocumentClient,
   PutCommand
 } from "@aws-sdk/lib-dynamodb"
+
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+]
 
 const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
@@ -26,13 +30,15 @@ const tableName = "Item"
 export const handler = async (event, context) =>
 {
   console.log('event query string:', event.queryStringParameters, 'method', event.httpMethod)
-
+  const date = new Date()
   try {
     let putOutput = await dynamo.send(new PutCommand({
       TableName: tableName,
       Item: {
         item_id: uuidv4(),
-        item_name: event.queryStringParameters['item_name']
+        item_name: event.queryStringParameters['item_name'],
+        date_purchased_milliseconds: Date.now(),
+        date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
       }
     }))
 
