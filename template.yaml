@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-lambda-simple
+
+  Sample SAM Template for sam-lambda-simple
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+Resources:
+  ReadDDB:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: read-ddb/
+      Handler: read_from_ddb.handler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      Events:
+        ReadFromDDB:
+          Type: Api
+          Properties:
+            Path: /ReadFromDDB/items
+            Method: get
+  WriteDDB:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: write-ddb/
+      Handler: write_to_ddb.handler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      Events:
+        WriteToTableItem:
+          Type: Api
+          Properties:
+            Path: /WriteToDDB/putItem
+            Method: post
+
+  ItemsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey: 
+        Name: item_id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: 'Item'
+
+
+
