@@ -25,19 +25,28 @@ const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 const tableName = "Item"
 
-export const handler = async (event, context) => {
+export const handler = async (event, context) => { 
+  
+  //handles cases for headers and query strings
   const date = new Date()
-  var item_name
+  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs
 
-  if (event.queryStringParameters !== null) item_name = event.queryStringParameters['item_name']
-  else if (event.headers["Item-Name"] !== null) item_name = event.headers["Item-Name"]
-
+  if (event.queryStringParameters !== null) {
+    item_name = event.queryStringParameters['item_name']
+    date_purchased_epoch_dayjs = event.queryStringParameters['date_purchased_epoch_dayjs']
+    expiry_date_epoch_dayjs = event.queryStringParameters['expiry_date_epoch_dayjs']
+  }
+  else if (event.headers["Item-Name"] !== null) {
+    item_name = event.headers["Item-Name"]
+  }
+  
   try {
     let putOutput = await dynamo.send(new PutCommand({
       TableName: tableName,
       Item: {
         item_id: uuidv4(),
         item_name: item_name,
+        date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
         date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
       }
     }))
