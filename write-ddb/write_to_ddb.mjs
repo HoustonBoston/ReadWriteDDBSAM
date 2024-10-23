@@ -37,6 +37,7 @@ export const handler = async (event, context) => {
     expiry_date_epoch_dayjs = event.queryStringParameters['expiry_date_epoch_dayjs']
   }
   else if (event.headers["Item-Name"] !== null) {
+    // add more header key values if needed
     item_name = event.headers["Item-Name"]
   }
   
