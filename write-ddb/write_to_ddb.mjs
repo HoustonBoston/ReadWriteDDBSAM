@@ -40,6 +40,7 @@ export const handler = async (event, context) => {
     item_id = event.queryStringParameters['item_id']
   }
   else if (event.headers["Item-Name"] !== null) {
+    // add more header key values if needed
     item_name = event.headers["Item-Name"]
   }
 
