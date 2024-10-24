@@ -18,6 +18,8 @@ import {
   PutCommand
 } from "@aws-sdk/lib-dynamodb"
 
+import dayjs, { unix } from 'dayjs' // make sure any date is a dayjs object
+
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"]
 
@@ -25,31 +27,49 @@ const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 const tableName = "Item"
 
-export const handler = async (event, context) => { 
-  
+export const handler = async (event, context) => {
+
   //handles cases for headers and query strings
   const date = new Date()
-  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs
+  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, item_id
 
   if (event.queryStringParameters !== null) {
     item_name = event.queryStringParameters['item_name']
     date_purchased_epoch_dayjs = event.queryStringParameters['date_purchased_epoch_dayjs']
     expiry_date_epoch_dayjs = event.queryStringParameters['expiry_date_epoch_dayjs']
+    item_id = event.queryStringParameters['item_id']
   }
   else if (event.headers["Item-Name"] !== null) {
     item_name = event.headers["Item-Name"]
   }
-  
+
   try {
-    let putOutput = await dynamo.send(new PutCommand({
-      TableName: tableName,
-      Item: {
-        item_id: uuidv4(),
-        item_name: item_name,
-        date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
-        date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
-      }
-    }))
+    if (item_id !== null) { // if item already exists
+      var putOutput = await dynamo.send(new PutCommand({
+        TableName: tableName,
+        Item: {
+          item_id: item_id,
+          item_name: item_name,
+          expiry_date: expiry_date_epoch_dayjs,
+          date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
+          date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
+        }
+      }))
+    } else { //make new item with
+      date_purchased_epoch_dayjs = dayjs().hour(12)
+      expiry_date_epoch_dayjs = dayjs().hour(12)
+
+      putOutput = await dynamo.send(new PutCommand({
+        TableName: tableName,
+        Item: {
+          item_id: uuidv4(),
+          item_name: item_name,
+          expiry_date: expiry_date_epoch_dayjs,
+          date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
+          date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
+        }
+      }))
+    }
 
     return {
       statusCode: 200,

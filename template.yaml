@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   sam-lambda-simple
@@ -21,13 +21,17 @@ Resources:
       Handler: read_from_ddb.handler
       Runtime: nodejs20.x
       Architectures:
-      - x86_64
+        - x86_64
       Events:
         ReadFromDDB:
           Type: Api
           Properties:
             Path: /ReadFromDDB/items
             Method: get
+            Cors:
+              AllowMethods: "'*'"
+              AllowHeaders: "'*'"
+              AllowOrigin: "'*'"
   WriteDDB:
     Type: AWS::Serverless::Function
     Properties:
@@ -35,24 +39,35 @@ Resources:
       Handler: write_to_ddb.handler
       Runtime: nodejs20.x
       Architectures:
-      - x86_64
+        - x86_64
       Events:
         WriteToTableItem:
           Type: Api
           Properties:
             Path: /WriteToDDB/putItem
             Method: post
+  ItemUpdateDDB:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: update-ddb/
+      Handler: update_item.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        UpdateItem:
+          Type: Api
+          Properties:
+            Path: /UpdateDDB/item
+            Method: post
 
   ItemsTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      PrimaryKey: 
+      PrimaryKey:
         Name: item_id
         Type: String
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      TableName: 'Item'
-
-
-
+      TableName: "Item"
