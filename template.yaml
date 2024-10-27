@@ -14,6 +14,22 @@ Globals:
     LoggingConfig:
       LogFormat: JSON
 Resources:
+  GetItemsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET, OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+  PutItemApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
   ReadDDB:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -28,6 +44,8 @@ Resources:
           Properties:
             Path: /ReadFromDDB/items
             Method: get
+            RestApiId: 
+              Ref: GetItemsApi
   WriteDDB:
     Type: AWS::Serverless::Function
     Properties:
@@ -42,6 +60,8 @@ Resources:
           Properties:
             Path: /WriteToDDB/putItem
             Method: post
+            RestApiId: 
+              Ref: PutItemApi
 
   ItemsTable:
     Type: AWS::Serverless::SimpleTable

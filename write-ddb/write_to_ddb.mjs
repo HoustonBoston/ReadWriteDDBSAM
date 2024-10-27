@@ -19,7 +19,7 @@ import
   PutCommand
 } from "@aws-sdk/lib-dynamodb"
 
-import dayjs, { unix } from 'dayjs' // make sure any date is a dayjs object
+import dayjs from "dayjs" // make sure any date is a dayjs object
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"]
@@ -47,39 +47,33 @@ export const handler = async (event, context) =>
   }
   var putOutput
   try {
-    if (item_id !== null) { // if item already exists
-      putOutput = await dynamo.send(new PutCommand({
-        TableName: tableName,
-        Item: {
-          item_id: item_id,
-          item_name: item_name,
-          expiry_date: expiry_date_epoch_dayjs,
-          date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
-          date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
-        }
-      }))
-    } else { //make new item with
-      date_purchased_epoch_dayjs = dayjs().hour(12)
+    if (!item_id)
+      item_id = uuidv4()
+    if(!expiry_date_epoch_dayjs)
       expiry_date_epoch_dayjs = dayjs().hour(12)
+    if(!date_purchased_epoch_dayjs) 
+        date_purchased_epoch_dayjs = dayjs().hour(12)
 
-      putOutput = await dynamo.send(new PutCommand({
-        TableName: tableName,
-        Item: {
-          item_id: uuidv4(),
-          item_name: item_name,
-          expiry_date: expiry_date_epoch_dayjs,
-          date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
-          date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
-        }
-      }))
-    }
+    console.log('entering if statement in write_to_ddb')
+    console.log('item id is', item_id)
+    putOutput = await dynamo.send(new PutCommand({
+      TableName: tableName,
+      Item: {
+        item_id: item_id,
+        item_name: item_name,
+        expiry_date: expiry_date_epoch_dayjs,
+        date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
+        date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
+      }
+    }))
+
 
     return {
       statusCode: 200,
       headers: {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Origin": "*", // Allow from anywhere 
-        "Access-Control-Allow-Methods": "POST" // Allow only POST request 
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
       },
       body: JSON.stringify(putOutput)
     }
@@ -89,8 +83,8 @@ export const handler = async (event, context) =>
       'statusCode': 500,
       headers: {
         "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Origin": "*", // Allow from anywhere 
-        "Access-Control-Allow-Methods": "POST" // Allow only POST request 
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
       },
       body: JSON.stringify(error)
     }
