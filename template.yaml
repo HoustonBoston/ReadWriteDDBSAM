@@ -28,10 +28,6 @@ Resources:
           Properties:
             Path: /ReadFromDDB/items
             Method: get
-            Cors:
-              AllowMethods: "'*'"
-              AllowHeaders: "'*'"
-              AllowOrigin: "'*'"
   WriteDDB:
     Type: AWS::Serverless::Function
     Properties:
@@ -45,20 +41,6 @@ Resources:
           Type: Api
           Properties:
             Path: /WriteToDDB/putItem
-            Method: post
-  ItemUpdateDDB:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: update-ddb/
-      Handler: update_item.handler
-      Runtime: nodejs20.x
-      Architectures:
-        - x86_64
-      Events:
-        UpdateItem:
-          Type: Api
-          Properties:
-            Path: /UpdateDDB/item
             Method: post
 
   ItemsTable:
