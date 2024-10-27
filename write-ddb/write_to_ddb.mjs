@@ -13,7 +13,8 @@
 
 import { v4 as uuidv4 } from "uuid"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import {
+import
+{
   DynamoDBDocumentClient,
   PutCommand
 } from "@aws-sdk/lib-dynamodb"
@@ -27,7 +28,8 @@ const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 const tableName = "Item"
 
-export const handler = async (event, context) => {
+export const handler = async (event, context) =>
+{
 
   //handles cases for headers and query strings
   const date = new Date()
@@ -43,10 +45,10 @@ export const handler = async (event, context) => {
     // add more header key values if needed
     item_name = event.headers["Item-Name"]
   }
-
+  var putOutput
   try {
     if (item_id !== null) { // if item already exists
-      var putOutput = await dynamo.send(new PutCommand({
+      putOutput = await dynamo.send(new PutCommand({
         TableName: tableName,
         Item: {
           item_id: item_id,
@@ -74,12 +76,23 @@ export const handler = async (event, context) => {
 
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Origin": "*", // Allow from anywhere 
+        "Access-Control-Allow-Methods": "POST" // Allow only POST request 
+      },
       body: JSON.stringify(putOutput)
     }
   } catch (error) {
     console.error('catching error:', error)
     return {
-      'statusCode': 500, body: JSON.stringify(error)
+      'statusCode': 500,
+      headers: {
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Origin": "*", // Allow from anywhere 
+        "Access-Control-Allow-Methods": "POST" // Allow only POST request 
+      },
+      body: JSON.stringify(error)
     }
   }
 };
