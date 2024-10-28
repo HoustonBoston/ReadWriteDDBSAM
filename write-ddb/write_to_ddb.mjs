@@ -46,6 +46,7 @@ export const handler = async (event, context) =>
     item_name = event.headers["Item-Name"]
   }
   var putOutput
+  console.log('variables:', item_id, item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, date_purchased_epoch_dayjs)
   try {
     if (!item_id)
       item_id = uuidv4()
@@ -67,7 +68,7 @@ export const handler = async (event, context) =>
       }
     }))
 
-
+    console.log('putOutput', putOutput)
     return {
       statusCode: 200,
       headers: {
