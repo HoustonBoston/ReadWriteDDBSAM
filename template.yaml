@@ -30,6 +30,14 @@ Resources:
         AllowMethods: "'OPTIONS, POST'"
         AllowHeaders: "'Content-Type'"
         AllowOrigin: "'*'"
+  DeleteItemApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
   ReadDDB:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -44,7 +52,7 @@ Resources:
           Properties:
             Path: /ReadFromDDB/items
             Method: get
-            RestApiId: 
+            RestApiId:
               Ref: GetItemsApi
   WriteDDB:
     Type: AWS::Serverless::Function
@@ -60,8 +68,24 @@ Resources:
           Properties:
             Path: /WriteToDDB/putItem
             Method: post
-            RestApiId: 
+            RestApiId:
               Ref: PutItemApi
+  DeleteItemDDB:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delete-item-ddb/
+      Handler: delete_item.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        DeleteItemDDB:
+          Type: Api
+          Properties:
+            Path: /DeleteItem/item/{id}
+            Method: post
+            RestApiId: 
+              Ref: DeleteItemApi
 
   ItemsTable:
     Type: AWS::Serverless::SimpleTable
