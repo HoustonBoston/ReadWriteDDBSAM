@@ -12,12 +12,7 @@
  */
 
 import { v4 as uuidv4 } from "uuid"
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import
-{
-  DynamoDBDocumentClient,
-  PutCommand
-} from "@aws-sdk/lib-dynamodb"
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb"
 
 import dayjs from "dayjs" // make sure any date is a dayjs object
 
@@ -25,46 +20,45 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"]
 
 const client = new DynamoDBClient({})
-const dynamo = DynamoDBDocumentClient.from(client)
 const tableName = "Item"
 
 export const handler = async (event, context) =>
 {
-
   //handles cases for headers and query strings
   const date = new Date()
-  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, item_id
+  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, item_id, timestamp
 
   if (event.queryStringParameters !== null) {
     item_name = event.queryStringParameters['item_name']
     date_purchased_epoch_dayjs = event.queryStringParameters['date_purchased_epoch_dayjs']
     expiry_date_epoch_dayjs = event.queryStringParameters['expiry_date_epoch_dayjs']
     item_id = event.queryStringParameters['item_id']
+    timestamp = Number(event.queryStringParameters['timestamp'])
   }
   else if (event.headers["Item-Name"] !== null) {
     // add more header key values if needed
     item_name = event.headers["Item-Name"]
   }
   var putOutput
-  console.log('variables:', item_id, item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, date_purchased_epoch_dayjs)
-  try {
-    if (!item_id)
-      item_id = uuidv4()
-    if(!expiry_date_epoch_dayjs)
-      expiry_date_epoch_dayjs = dayjs().hour(12)
-    if(!date_purchased_epoch_dayjs) 
-        date_purchased_epoch_dayjs = dayjs().hour(12)
+  console.log('info about the items received:', 'item id', item_id, 'item name', item_name, 'date purchased', date_purchased_epoch_dayjs, 'expiry date', expiry_date_epoch_dayjs)
+  console.log('type of date_purchased_epoch_dayjs', typeof(date_purchased_epoch_dayjs), 'type of expiry_date_epoch_dayjs', typeof(expiry_date_epoch_dayjs))
 
-    console.log('entering if statement in write_to_ddb')
-    console.log('item id is', item_id)
-    putOutput = await dynamo.send(new PutCommand({
+  try {
+    console.log('trying in write_to_ddb')
+    item_id = item_id || uuidv4()
+    expiry_date_epoch_dayjs = (expiry_date_epoch_dayjs || dayjs().hour(12).unix())
+    date_purchased_epoch_dayjs = (date_purchased_epoch_dayjs || dayjs().hour(12).unix())
+    timestamp = timestamp || dayjs().unix()
+
+    putOutput = await client.send(new PutItemCommand({
       TableName: tableName,
       Item: {
-        item_id: item_id,
-        item_name: item_name,
-        expiry_date: expiry_date_epoch_dayjs,
-        date_purchased_epoch_dayjs: date_purchased_epoch_dayjs,
-        date_purchased_string: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
+        item_id: { "S": item_id },
+        timestamp: { "N": timestamp.toString() },
+        item_name: { "S": item_name },
+        expiry_date: { "N": expiry_date_epoch_dayjs.toString() },
+        purchase_date: { "N": date_purchased_epoch_dayjs.toString() },
+        date_purchased_string: { "S": `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}` }
       }
     }))
 

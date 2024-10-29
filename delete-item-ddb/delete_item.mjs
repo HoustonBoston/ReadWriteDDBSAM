@@ -12,13 +12,15 @@ export const handler = async (event, context) =>
     console.log('id', event.pathParameters.id)
     const item_id = event.pathParameters.id
     const tableName = "Item"
-
+    const timestamp = event.queryStringParameters['timestamp']
+    
     try {
         const deleteOutput = await client.send(new DeleteItemCommand(
             {
                 TableName: tableName,
                 Key: {
-                    item_id: { "S": item_id }
+                    item_id: { "S": item_id },
+                    timestamp: {"N": timestamp}
                 }
             }
         ))
