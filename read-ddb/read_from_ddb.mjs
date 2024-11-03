@@ -5,7 +5,8 @@ const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 const tableName = "Item"
 
-export const handler = async (event, context) => {
+export const handler = async (event, context) =>
+{
     console.log('calling function read_from_ddb with method', event.httpMethod)
     console.log('event:', event)
     try {
@@ -20,13 +21,21 @@ export const handler = async (event, context) => {
             headers: {
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Origin": "*", // Allow from anywhere 
-                "Access-Control-Allow-Methods": "GET, OPTIONS" 
+                "Access-Control-Allow-Methods": "GET, OPTIONS"
             },
             body: JSON.stringify(output)
         }
 
     } catch (error) {
         console.log('catching error', error)
-        return { "statusCode": 500, body: JSON.stringify(event) }
+        return {
+            "statusCode": 500,
+            headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*", // Allow from anywhere 
+                "Access-Control-Allow-Methods": "GET, OPTIONS"
+            },
+            body: JSON.stringify(event)
+        }
     }
 }
