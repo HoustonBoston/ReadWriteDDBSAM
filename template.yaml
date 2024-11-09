@@ -38,6 +38,14 @@ Resources:
         AllowMethods: "'OPTIONS, POST'"
         AllowHeaders: "'Content-Type'"
         AllowOrigin: "'*'"
+  CapturePhotoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
   ReadDDB:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -84,8 +92,24 @@ Resources:
           Properties:
             Path: /DeleteItem/item/{id}
             Method: post
-            RestApiId: 
+            RestApiId:
               Ref: DeleteItemApi
+  CapturePhoto:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: capture-photo/
+      Handler: capture_photo.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        CapturePhoto:
+          Type: Api
+          Properties:
+            Path: /capturePhoto/item
+            Method: post
+            RestApiId:
+              Ref: CapturePhotoApi
 
   ItemsTable:
     Type: AWS::DynamoDB::Table
