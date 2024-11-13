@@ -1,19 +1,63 @@
+import { RekognitionClient, DetectTextCommand } from "@aws-sdk/client-rekognition"
 
+const client = new RekognitionClient({})
 
 export const handler = async (event) =>
 {
     console.log('entering capture photo lambda function')
-    const body = JSON.parse(event.body)
+    const body = typeof(event.body) === 'string' ? JSON.parse(event.body) : event.body
 
-    const image = body?.base64Image || ""
+    let image = body?.base64Image || "" //image is a base64 encoded string
+    
+    if (image){
+        console.log('info about image', image.substring(0, 24))
+        console.log('base64 image size', image.length)
+        if(image.charAt(22) === ","){
+            image = image.substring(23)
+        }
+        else if (image.charAt(21) === ",")
+            image = image.substring(22)
+    }
 
-    return {
-        statusCode: 200,
-        body: "capture photo lambda function OK status code",
-        headers: {
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Origin": "*", // Allow from anywhere 
-            "Access-Control-Allow-Methods": "POST, OPTIONS"
+    const input = {
+        Image: {
+            Bytes: Buffer.from(image, 'base64')
+        },
+        Filters: {
+            WordFilter: {
+                MinConfidence: 70
+            }
         }
     }
+    try {
+        if (image) {
+            console.log('calling detect text API')
+            const command = new DetectTextCommand(input)
+            var response = await client.send(command)
+            console.log('response from detect text command:', JSON.stringify(response))
+        }
+        return {
+            statusCode: 200,
+            body: JSON.stringify(response),
+            headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*", // Allow from anywhere 
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            }
+        }
+    } catch (error) {
+        console.error('error from capture_photo', error)
+        return {
+            statusCode: 500,
+            body: JSON.stringify(error),
+            headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*", // Allow from anywhere 
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            }
+        }
+    }
+
+
+
 }
