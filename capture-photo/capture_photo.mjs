@@ -25,7 +25,7 @@ export const handler = async (event) =>
         },
         Filters: {
             WordFilter: {
-                MinConfidence: 70
+                MinConfidence: 85
             }
         }
     }

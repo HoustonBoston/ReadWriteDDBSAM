@@ -7,10 +7,8 @@ const tableName = "Item"
 
 export const handler = async (event, context) =>
 {
-    console.log('calling function read_from_ddb with method', event.httpMethod)
-    console.log('event:', event)
     try {
-        console.log('trying')
+        console.log('trying in read_from_ddb handler')
         let output = await dynamo.send(new ScanCommand({
             TableName: tableName
         }))
@@ -27,7 +25,7 @@ export const handler = async (event, context) =>
         }
 
     } catch (error) {
-        console.log('catching error', error)
+        console.log('catching error in read_from_ddb handler', error)
         return {
             "statusCode": 500,
             headers: {
