@@ -1,19 +1,26 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb'
 
 const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 const tableName = "Item"
 
-export const handler = async (event, context) =>
-{
+export const handler = async (event, context) => {
+    const email = event.queryStringParameters['email']
+
+    console.log('email param', email)
+
     try {
         console.log('trying in read_from_ddb handler')
-        let output = await dynamo.send(new ScanCommand({
-            TableName: tableName
+        let output = await dynamo.send(new QueryCommand({
+            TableName: tableName,
+            KeyConditionExpression: "user_email = :userEmail",
+            ExpressionAttributeValues: {
+                ":userEmail": email
+            },
+            ScanIndexForward: false
         }))
 
-        console.log('Item count', output.Count)
         return {
             "statusCode": 200,
             headers: {

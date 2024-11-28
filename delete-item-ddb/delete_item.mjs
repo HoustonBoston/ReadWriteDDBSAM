@@ -1,26 +1,25 @@
-import
-{
+import {
     DynamoDBClient,
     DeleteItemCommand
 } from "@aws-sdk/client-dynamodb"
 
 const client = new DynamoDBClient({})
 
-export const handler = async (event, context) =>
-{
+export const handler = async (event, context) => {
     console.log('event path params', event.pathParameters)
-    console.log('id', event.pathParameters.id)
-    const item_id = event.pathParameters.id
+    console.log('email', event.pathParameters.email)
+    const email = event.pathParameters.email
     const tableName = "Item"
     const timestamp = event.queryStringParameters['timestamp']
-    
+    console.log('email', email)
+
     try {
         const deleteOutput = await client.send(new DeleteItemCommand(
             {
                 TableName: tableName,
                 Key: {
-                    item_id: { "S": item_id },
-                    timestamp: {"N": timestamp}
+                    user_email: { "S": email },
+                    timestamp: { "N": timestamp }
                 }
             }
         ))

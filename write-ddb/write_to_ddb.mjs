@@ -22,11 +22,10 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 const client = new DynamoDBClient({})
 const tableName = "Item"
 
-export const handler = async (event, context) =>
-{
+export const handler = async (event, context) => {
   //handles cases for headers and query strings
   const date = new Date()
-  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, item_id, timestamp
+  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, item_id, timestamp, userEmail
 
   if (event.queryStringParameters !== null) {
     item_name = event.queryStringParameters['item_name']
@@ -34,6 +33,7 @@ export const handler = async (event, context) =>
     expiry_date_epoch_dayjs = event.queryStringParameters['expiry_date_epoch_dayjs']
     item_id = event.queryStringParameters['item_id']
     timestamp = Number(event.queryStringParameters['timestamp'])
+    userEmail = event.queryStringParameters['email']
   }
   else if (event.headers["Item-Name"] !== null) {
     // add more header key values if needed
@@ -41,7 +41,7 @@ export const handler = async (event, context) =>
   }
   var putOutput
   console.log('info about the items received:', 'item id', item_id, 'item name', item_name, 'date purchased', date_purchased_epoch_dayjs, 'expiry date', expiry_date_epoch_dayjs)
-  console.log('type of date_purchased_epoch_dayjs', typeof(date_purchased_epoch_dayjs), 'type of expiry_date_epoch_dayjs', typeof(expiry_date_epoch_dayjs))
+  console.log('type of date_purchased_epoch_dayjs', typeof (date_purchased_epoch_dayjs), 'type of expiry_date_epoch_dayjs', typeof (expiry_date_epoch_dayjs))
 
   try {
     console.log('trying in write_to_ddb')
@@ -53,8 +53,9 @@ export const handler = async (event, context) =>
     putOutput = await client.send(new PutItemCommand({
       TableName: tableName,
       Item: {
-        item_id: { "S": item_id },
+        user_email: { "S": userEmail },
         timestamp: { "N": timestamp.toString() },
+        item_id: { "S": item_id },
         item_name: { "S": item_name },
         expiry_date: { "N": expiry_date_epoch_dayjs.toString() },
         purchase_date: { "N": date_purchased_epoch_dayjs.toString() },

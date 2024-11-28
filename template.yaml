@@ -87,7 +87,7 @@ Resources:
         DeleteItemDDB:
           Type: Api
           Properties:
-            Path: /DeleteItem/item/{id}
+            Path: /DeleteItem/item/{email}
             Method: post
             RestApiId: !Ref DeleteItemApi
   CapturePhoto:
@@ -111,15 +111,15 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: item_id
+        - AttributeName: user_email
           AttributeType: S
         - AttributeName: timestamp
-          AttributeType: "N"
+          AttributeType: S
       KeySchema:
-        - AttributeName: item_id
-          KeyType: HASH #primary key
+        - AttributeName: user_email
+          KeyType: HASH # primary key
         - AttributeName: timestamp
-          KeyType: RANGE
+          KeyType: RANGE # sort key
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
