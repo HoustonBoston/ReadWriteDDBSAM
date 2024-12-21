@@ -75,6 +75,14 @@ Resources:
             Path: /WriteToDDB/putItem
             Method: post
             RestApiId: !Ref PutItemApi
+  ScanSendNotif:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: scan-send-notif/
+      Handler: scan_send_notif.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
   DeleteItemDDB:
     Type: AWS::Serverless::Function
     Properties:
