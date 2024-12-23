@@ -122,7 +122,7 @@ Resources:
         - AttributeName: user_email
           AttributeType: S
         - AttributeName: timestamp
-          AttributeType: S
+          AttributeType: N
       KeySchema:
         - AttributeName: user_email
           KeyType: HASH # primary key
@@ -132,3 +132,16 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
       TableName: Item
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+        - AttributeName: user_email
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: user_email
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: User
