@@ -13,6 +13,7 @@ Globals:
     LoggingConfig:
       LogFormat: JSON
 Resources:
+  #APIs
   GetItemsApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -45,6 +46,16 @@ Resources:
         AllowMethods: "'OPTIONS, POST'"
         AllowHeaders: "'Content-Type'"
         AllowOrigin: "'*'"
+  CheckEmailExistenceApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, GET'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
+  #Lambda functions
   ReadDDB:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -114,7 +125,24 @@ Resources:
             Path: /capturePhoto/item
             Method: post
             RestApiId: !Ref CapturePhotoApi
+  CheckEmailExistence:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: check-email-existence/
+      Handler: check_email_existence.handler
+      Runtime: nodejs20.x
+      Timeout: 4
+      Architectures:
+        - x86_64
+      Events:
+        CheckEmailExist:
+          Type: Api
+          Properties:
+            Path: /checkEmailExistence/email
+            Method: get
+            RestApiId: !Ref CheckEmailExistenceApi
 
+  #DDB Tables
   ItemsTable:
     Type: AWS::DynamoDB::Table
     Properties:

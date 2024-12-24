@@ -11,8 +11,9 @@ const sesClient = new SESClient({})
 
 export const handler = async (event, context) =>
 {
-    const body = typeof (event.body) === 'string' ? JSON.parse(event.body) : event.body
-    let userEmail = body?.email || ""
+    console.log('entering CheckEmailExistence')
+    let userEmail = event.queryStringParameters['email']
+    console.log('userEmail:', userEmail)
     const input = {
         TableName: tableName,
         Key: {
@@ -27,33 +28,32 @@ export const handler = async (event, context) =>
         const getRes = await dynamoClient.send(command)
         console.log("getRes.Item:", getRes.Item)
 
-        if (res.Item) // if it exists don't do anything
+        if (getRes.Item) // if it exists don't do anything
             return {
                 statusCode: 200,
                 body: true
             }
         else { // otherwise send email subscription req and then put in DB
-            try {
-                const putRes = dynamoClient.send(new PutItemCommand({
-                    TableName: tableName,
-                    Item: {
-                        user_email: { S: userEmail }
-                    }
-                }))
-                console.log('putRes:', putRes)
-            } catch (e) {
-                console.error('Failed to put in DDB', e)
-                return {
-                    statusCode: 500,
-                    body: JSON.stringify(e)
-                }
-            }
-
             // email sub req
             try {
                 let verifyRes = sesClient.send(new VerifyEmailIdentityCommand({
                     EmailAddress: userEmail
                 }))
+                try {
+                    const putRes = dynamoClient.send(new PutItemCommand({
+                        TableName: tableName,
+                        Item: {
+                            user_email: { S: userEmail }
+                        }
+                    }))
+                    console.log('putRes:', putRes)
+                } catch (e) {
+                    console.error('Failed to put in DDB', e)
+                    return {
+                        statusCode: 500,
+                        body: JSON.stringify(e)
+                    }
+                }
                 return {
                     statusCode: 200,
                     body: JSON.stringify(verifyRes)
@@ -66,8 +66,8 @@ export const handler = async (event, context) =>
                 }
             }
         }
-
-    } catch (e) {
+    }
+    catch (e) {
         console.error("couldn't retrieve from DDB", e)
         return {
             statusCode: 500,

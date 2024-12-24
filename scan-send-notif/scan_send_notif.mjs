@@ -75,7 +75,7 @@ export const handler = async () =>
                         return `-${item}\n`
                     })
                 const snsInput = {
-                    Source: "rajeshros23@gmail.com",
+                    Source: "myhorsefly12345@gmail.com",
                     Destination: {
                         ToAddresses: [email]
                     },
