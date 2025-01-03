@@ -1,0 +1,180 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: |"Infrastructure for Fridge Log app."
+  sam-lambda-simple
+  Sample SAM Template for sam-lambda-simple
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+Resources:
+  #APIs
+  GetItemsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: "GetItemsApi"
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET, OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+  PutItemApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: "PutItemApi"
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+  DeleteItemApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: "DeleteItemAPi"
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+  CapturePhotoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: "CapturePhotoApi"
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+  CheckEmailExistenceApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: "CheckEmailExistenceApi"
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS, GET'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
+  #Lambda functions
+  ReadDDB:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: read-ddb/
+      Handler: read_from_ddb.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        ReadFromDDB:
+          Type: Api
+          Properties:
+            Path: /ReadFromDDB/items
+            Method: get
+            RestApiId: !Ref GetItemsApi
+  WriteDDB:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: write-ddb/
+      Handler: write_to_ddb.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        WriteToTableItem:
+          Type: Api
+          Properties:
+            Path: /WriteToDDB/putItem
+            Method: post
+            RestApiId: !Ref PutItemApi
+  ScanSendNotif:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: scan-send-notif/
+      Handler: scan_send_notif.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+  DeleteItemDDB:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delete-item-ddb/
+      Handler: delete_item.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        DeleteItemDDB:
+          Type: Api
+          Properties:
+            Path: /DeleteItem/item/{email}
+            Method: post
+            RestApiId: !Ref DeleteItemApi
+  CapturePhoto:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: capture-photo/
+      Handler: capture_photo.handler
+      Runtime: nodejs20.x
+      Timeout: 6
+      Architectures:
+        - x86_64
+      Events:
+        CapturePhoto:
+          Type: Api
+          Properties:
+            Path: /capturePhoto/item
+            Method: post
+            RestApiId: !Ref CapturePhotoApi
+  CheckEmailExistence:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: check-email-existence/
+      Handler: check_email_existence.handler
+      Runtime: nodejs20.x
+      Timeout: 4
+      Architectures:
+        - x86_64
+      Events:
+        CheckEmailExist:
+          Type: Api
+          Properties:
+            Path: /checkEmailExistence/email
+            Method: get
+            RestApiId: !Ref CheckEmailExistenceApi
+
+  #DDB Tables
+  ItemsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_email
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: user_email
+          KeyType: HASH # primary key
+        - AttributeName: timestamp
+          KeyType: RANGE # sort key
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: FridgeLogItem
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+        - AttributeName: user_email
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: user_email
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: FridgeLogUser
