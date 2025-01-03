@@ -1,8 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: |"Infrastructure for Fridge Log app."
-  sam-lambda-simple
-  Sample SAM Template for sam-lambda-simple
+Description: "Infrastructure for Fridge Log app."
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
