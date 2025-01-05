@@ -25,11 +25,10 @@ const tableName = "FridgeLogItem"
 export const handler = async (event, context) => {
   //handles cases for headers and query strings
   const date = new Date()
-  var item_name, date_purchased_epoch_dayjs, expiry_date_epoch_dayjs, item_id, timestamp, userEmail
+  var item_name, expiry_date_epoch_dayjs, item_id, timestamp, userEmail
 
   if (event.queryStringParameters !== null) {
     item_name = event.queryStringParameters['item_name']
-    date_purchased_epoch_dayjs = event.queryStringParameters['date_purchased_epoch_dayjs']
     expiry_date_epoch_dayjs = event.queryStringParameters['expiry_date_epoch_dayjs']
     item_id = event.queryStringParameters['item_id']
     timestamp = Number(event.queryStringParameters['timestamp'])
@@ -40,14 +39,11 @@ export const handler = async (event, context) => {
     item_name = event.headers["Item-Name"]
   }
   var putOutput
-  console.log('info about the items received:', 'item id', item_id, 'item name', item_name, 'date purchased', date_purchased_epoch_dayjs, 'expiry date', expiry_date_epoch_dayjs)
-  console.log('type of date_purchased_epoch_dayjs', typeof (date_purchased_epoch_dayjs), 'type of expiry_date_epoch_dayjs', typeof (expiry_date_epoch_dayjs))
 
   try {
     console.log('trying in write_to_ddb')
     item_id = item_id || uuidv4()
     expiry_date_epoch_dayjs = (expiry_date_epoch_dayjs || dayjs().hour(12).unix())
-    date_purchased_epoch_dayjs = (date_purchased_epoch_dayjs || dayjs().hour(12).unix())
     timestamp = timestamp || dayjs().unix()
 
     putOutput = await client.send(new PutItemCommand({
@@ -58,8 +54,6 @@ export const handler = async (event, context) => {
         item_id: { "S": item_id },
         item_name: { "S": item_name },
         expiry_date: { "N": expiry_date_epoch_dayjs.toString() },
-        purchase_date: { "N": date_purchased_epoch_dayjs.toString() },
-        date_purchased_string: { "S": `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}` }
       }
     }))
 
