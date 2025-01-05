@@ -62,6 +62,7 @@ Resources:
   ReadDDB:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
+      FunctionName: "ReadDDB"
       CodeUri: read-ddb/
       Handler: read_from_ddb.handler
       Runtime: nodejs20.x
@@ -77,6 +78,7 @@ Resources:
   WriteDDB:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: "WriteDDB"
       CodeUri: write-ddb/
       Handler: write_to_ddb.handler
       Runtime: nodejs20.x
@@ -93,6 +95,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: scan-send-notif/
+      FunctionName: "ScanSendNotif"
       Handler: scan_send_notif.handler
       Runtime: nodejs20.x
       Architectures:
@@ -100,6 +103,7 @@ Resources:
   DeleteItemDDB:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: "DeleteItemDDB"
       CodeUri: delete-item-ddb/
       Handler: delete_item.handler
       Runtime: nodejs20.x
@@ -116,6 +120,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: capture-photo/
+      FunctionName: "CapturePhoto"
       Handler: capture_photo.handler
       Runtime: nodejs20.x
       Timeout: 6
@@ -131,6 +136,7 @@ Resources:
   CheckEmailExistence:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: "CheckEmailExistence"
       CodeUri: check-email-existence/
       Handler: check_email_existence.handler
       Runtime: nodejs20.x
