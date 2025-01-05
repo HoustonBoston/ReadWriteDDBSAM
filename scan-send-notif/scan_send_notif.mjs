@@ -53,7 +53,7 @@ export const handler = async () =>
 
             // all dates in DB are in unix timestamp at hour 12
             console.log('item.expiry_date.N:', item.expiry_date.N, 'currentDateDayJsUnix:', currentDateDayJsUnix, ', difference:', item.expiry_date.N - currentDateDayJsUnix)
-            if (parseInt(item.expiry_date.N) - currentDateDayJsUnix <= 86400) { // if less than a day remains until expiration
+            if (parseInt(item.expiry_date.N) - currentDateDayJsUnix <= 86400 && parseInt(item.expiry_date.N) - currentDateDayJsUnix > 0) { // if less than a day remains until expiration
                 let userItemsArr = expiringItemsMap.get(userEmail) // push item to array for respective user email
                 userItemsArr.push(item.item_name.S)
                 expiringItemsMap.set(userEmail, userItemsArr)
