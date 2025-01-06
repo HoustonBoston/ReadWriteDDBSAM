@@ -4,7 +4,7 @@
  */
 
 import { GetItemCommand, DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb"
-import { SESClient, SendCustomVerificationEmailCommand } from "@aws-sdk/client-ses"
+import { SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses"
 
 const dynamoClient = new DynamoDBClient({})
 const tableName = "FridgeLogUser"
@@ -43,9 +43,8 @@ export const handler = async (event, context) =>
             // email sub req
             try {
                 console.log('trying to send verification email')
-                let verifyRes = await sesClient.send(new SendCustomVerificationEmailCommand({
-                    EmailAddress: userEmail,
-                    TemplateName: "FridgeLogConfirmVerificationTemplate"
+                let verifyRes = await sesClient.send(new VerifyEmailIdentityCommand({
+                    EmailAddress: userEmail
                 }))
                 console.log('result of email verification command', verifyRes)
                 try {
