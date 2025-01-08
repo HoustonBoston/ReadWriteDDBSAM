@@ -94,6 +94,7 @@ Resources:
   ScanSendNotif:
     Type: AWS::Serverless::Function
     Properties:
+      Timeout: 10
       CodeUri: scan-send-notif/
       FunctionName: "ScanSendNotif"
       Handler: scan_send_notif.handler
