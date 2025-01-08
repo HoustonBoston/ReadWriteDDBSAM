@@ -96,14 +96,13 @@ export const handler = async () =>
                         body: JSON.stringify(error)
                     }
                 }
-
-                // if successful in sending to all emails
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify(emailRes)
-                }
             }
         }
+    }
+    // if successful in sending to all emails
+    return {
+        statusCode: 200,
+        body: JSON.stringify(emailRes)
     }
 
 }
