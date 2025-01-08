@@ -40,10 +40,7 @@ export const handler = async () =>
 
         items.forEach(item =>
         {
-            console.log('item:', item)
-            console.log('item.item_name', item.item_name.S)
             const userEmail = item.user_email.S
-            console.log('user email:', userEmail)
 
             if (!expiringItemsMap.has(userEmail)) {
                 console.log('expiring items map does not have email:', userEmail)
@@ -53,7 +50,7 @@ export const handler = async () =>
 
             // all dates in DB are in unix timestamp at hour 12
             console.log('item.expiry_date.N:', item.expiry_date.N, 'currentDateDayJsUnix:', currentDateDayJsUnix, ', difference:', item.expiry_date.N - currentDateDayJsUnix)
-            if (parseInt(item.expiry_date.N) - currentDateDayJsUnix <= 86400 && parseInt(item.expiry_date.N) - currentDateDayJsUnix > 0) { // if less than a day remains until expiration
+            if (parseInt(item.expiry_date.N) - currentDateDayJsUnix <= 86400) { // if less than a day remains until expiration
                 let userItemsArr = expiringItemsMap.get(userEmail) // push item to array for respective user email
                 userItemsArr.push(item.item_name.S)
                 expiringItemsMap.set(userEmail, userItemsArr)
@@ -64,10 +61,7 @@ export const handler = async () =>
         // SES
 
         for (let [email, expiringItemsArray] of expiringItemsMap) {
-            console.log('items array length:', expiringItemsArray.length)
-            console.log('expiring items array', expiringItemsArray)
             if (expiringItemsArray.length > 0) {
-                console.log('user email in map:', email)
 
                 let message = `Dear user,\n\n The following items are expiring soon: \n\n` +
                     expiringItemsArray.map(item => `-${item}`).join('\n')
@@ -92,18 +86,21 @@ export const handler = async () =>
 
                 // now send expiring emails
                 try {
-                    const emailRes = await sesClient.send(new SendEmailCommand(snsInput))
+                    console.log('trying to send expiry email to:', email)
+                    var emailRes = await sesClient.send(new SendEmailCommand(snsInput))
 
-                    return {
-                        statusCode: 200,
-                        body: JSON.stringify(emailRes)
-                    }
                 } catch (error) {
                     console.error('SNS error:', error)
                     return {
                         statusCode: 500,
                         body: JSON.stringify(error)
                     }
+                }
+
+                // if successful in sending to all emails
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(emailRes)
                 }
             }
         }
