@@ -29,16 +29,17 @@ export const handler = async (event, context) =>
         const getRes = await dynamoClient.send(command)
         console.log("getRes.Item:", getRes.Item)
 
-        if (getRes.Item) // if it exists don't do anything
+        if (getRes.Item) { // if it exists don't do anything
             return {
                 statusCode: 200,
                 headers: {
                     "Access-Control-Allow-Headers": "Content-Type",
                     "Access-Control-Allow-Origin": "*", // Allow from anywhere 
                     "Access-Control-Allow-Methods": "POST, OPTIONS"
-                  },
+                },
                 body: true
             }
+        }
         else { // otherwise send email subscription req and then put in DB
             // email sub req
             try {
@@ -63,7 +64,7 @@ export const handler = async (event, context) =>
                             "Access-Control-Allow-Headers": "Content-Type",
                             "Access-Control-Allow-Origin": "*", // Allow from anywhere 
                             "Access-Control-Allow-Methods": "POST, OPTIONS"
-                          },
+                        },
                         body: JSON.stringify(e)
                     }
                 }
@@ -73,7 +74,7 @@ export const handler = async (event, context) =>
                         "Access-Control-Allow-Headers": "Content-Type",
                         "Access-Control-Allow-Origin": "*", // Allow from anywhere 
                         "Access-Control-Allow-Methods": "POST, OPTIONS"
-                      },
+                    },
                     body: JSON.stringify(verifyRes)
                 }
             } catch (e) {
@@ -84,7 +85,7 @@ export const handler = async (event, context) =>
                         "Access-Control-Allow-Headers": "Content-Type",
                         "Access-Control-Allow-Origin": "*", // Allow from anywhere 
                         "Access-Control-Allow-Methods": "POST, OPTIONS"
-                      },
+                    },
                     body: JSON.stringify(e)
                 }
             }
@@ -98,7 +99,7 @@ export const handler = async (event, context) =>
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Origin": "*", // Allow from anywhere 
                 "Access-Control-Allow-Methods": "POST, OPTIONS"
-              },
+            },
             body: JSON.stringify(e)
         }
     }
