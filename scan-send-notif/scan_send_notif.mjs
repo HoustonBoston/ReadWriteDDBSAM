@@ -1,5 +1,5 @@
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb"
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses"
+import { MessageRejected, SESClient, SendEmailCommand } from "@aws-sdk/client-ses"
 
 import dayjs from "dayjs"
 import utc from 'dayjs/plugin/utc.js'
@@ -50,7 +50,7 @@ export const handler = async () =>
 
             // all dates in DB are in unix timestamp at hour 12
             console.log('item.expiry_date.N:', item.expiry_date.N, 'currentDateDayJsUnix:', currentDateDayJsUnix, ', difference:', item.expiry_date.N - currentDateDayJsUnix)
-            if (parseInt(item.expiry_date.N) - currentDateDayJsUnix <= 86400) { // if less than a day remains until expiration
+            if ((parseInt(item.expiry_date.N) - currentDateDayJsUnix <= 86400) && (parseInt(item.expiry_date.N) - currentDateDayJsUnix >= 0)) { // if between a day remains until expiration
                 let userItemsArr = expiringItemsMap.get(userEmail) // push item to array for respective user email
                 userItemsArr.push(item.item_name.S)
                 expiringItemsMap.set(userEmail, userItemsArr)
@@ -91,9 +91,12 @@ export const handler = async () =>
 
                 } catch (error) {
                     console.error('SNS error:', error)
-                    return {
-                        statusCode: 500,
-                        body: JSON.stringify(error)
+                    if (error instanceof MessageRejected) continue //ignore if user is not verified.
+                    else {
+                        return {
+                            statusCode: 500,
+                            body: JSON.stringify(error)
+                        }
                     }
                 }
             }
