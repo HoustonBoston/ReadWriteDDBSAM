@@ -3,6 +3,7 @@
     "@aws-sdk/client-dynamodb": "^3.679.0",
     "@aws-sdk/client-rekognition": "^3.687.0",
     "@aws-sdk/client-ses": "^3.716.0",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "moondream": "^0.0.5"
   }
 }

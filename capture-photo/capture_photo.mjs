@@ -1,70 +1,38 @@
-import { RekognitionClient, DetectTextCommand } from "@aws-sdk/client-rekognition"
+import { vl } from "moondream"
 
-const client = new RekognitionClient({})
+const model = new vl({
+    apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlfaWQiOiJlMWNiMzhiMi1mMWQxLTRlYjctOGMzYS02MWNhOTViNmZhMGQiLCJpYXQiOjE3MzcxMzc4OTR9.BI0FT3zvPi_aXXbePnj_K05P8j2WR1_hQ7mTmhoAaLo"
+})
 
-export const handler = async (event) =>
-{
+export const handler = async (event) => {
     console.log('entering capture photo lambda function')
     const body = typeof (event.body) === 'string' ? JSON.parse(event.body) : event.body
 
     let image = body?.base64Image || "" //image is a base64 encoded string
 
-    if (image) {
-        console.log('info about image', image.substring(0, 24))
-        console.log('base64 image size', image.length)
-        if (image.charAt(22) === ",") {
-            image = image.substring(23)
-        }
-        else if (image.charAt(21) === ",")
-            image = image.substring(22)
-    }
-
-    const input = {
-        Image: {
-            Bytes: Buffer.from(image, 'base64')
-        },
-        Filters: {
-            WordFilter: {
-                MinConfidence: 85
-            }
-        }
-    }
     try {
-        console.log('trying in capture photo lambda')
-        if (image) {
-            console.log('inside if (image)')
-            console.log('calling detect text API')
-            const command = new DetectTextCommand(input)
-            var response = await client.send(command)
-            console.log('response from detect text command:', JSON.stringify(response))
-        }
-        if (response) {
-            return {
-                statusCode: 200,
-                body: JSON.stringify(response),
-                headers: {
-                    "Access-Control-Allow-Headers": "Content-Type",
-                    "Access-Control-Allow-Origin": "*", // Allow from anywhere 
-                    "Access-Control-Allow-Methods": "POST, OPTIONS"
-                }
-            }
-        }
-        else {
-            return {
-                statusCode: 500,
-                body: "Unable to detect text",
-                headers: {
-                    "Access-Control-Allow-Headers": "Content-Type",
-                    "Access-Control-Allow-Origin": "*", // Allow from anywhere 
-                    "Access-Control-Allow-Methods": "POST, OPTIONS"
-                }
-            }
-        }
-    } catch (error) {
-        console.error('error from capture_photo', error)
+        const response = await model.query({
+            image: image,
+            question: "What is the expiry date on this object?"
+        })
+
+        console.log('answer:', response)
+
         return {
-            statusCode: 500,
-            body: JSON.stringify(error),
+            statusCode: 200,
+            body: JSON.stringify(response),
+            headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*", // Allow from anywhere 
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            }
+        }
+    } catch (e) {
+        console.error('error when calling moondream:', e)
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(e),
             headers: {
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Origin": "*", // Allow from anywhere 
@@ -72,7 +40,4 @@ export const handler = async (event) =>
             }
         }
     }
-
-
-
 }
