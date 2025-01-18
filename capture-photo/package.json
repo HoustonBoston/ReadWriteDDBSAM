@@ -1,0 +1,7 @@
+{
+  "name": "capture-photo",
+  "version": "1.0.0",
+  "dependencies": {
+    "moondream": "^0.0.5"
+  }
+}
